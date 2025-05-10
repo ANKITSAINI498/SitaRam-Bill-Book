@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SitaRam Automobile Shop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .invoice-box {
+      border: 2px solid #ffb38a;
+      background-color: white;
+      padding: 30px;
+      margin: 20px auto;
+      max-width: 800px;
+    }
+
+    .invoice-header {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    table th,
+    table td {
+      border: 1px solid #ffa366 !important;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .no-border {
+      border: none !important;
+    }
+
+    .signature {
+      text-align: right;
+      margin-top: 40px;
+    }
+
+    .terms {
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container mt-4">
+
+    <center>
+        <marquee behavior="alternate" direction="right" scrollamount="10" loop="infinite"><h1>🛵   🚗   🚐   🏎️💨    🚚     🛺     🏍️    🚑     🚎    🦽    🦼    🛴    🚌    🚓    🚛    🛻    🚜    🚙    🛺 🛵   🚗   🚐   🏎️💨    🚚     🛺     🏍️    🚑     🚎    🦽    🦼    🛴    🚌    🚓    🚛    🛻    🚜    🚙    🛺 🛵   🚗   🚐   🏎️💨    🚚     🛺     🏍️    🚑     🚎    🦽    🦼    🛴    🚌    🚓    🚛    🛻    🚜    🚙    🛺 </h1> </marquee>
+      <h1 class="mb-4">🚗 SitaRam Automobile Bill-Book 🚗 </h1>
+    </center>
+
+    <form class="needs-validation" novalidate>
+
+      <div class="mb-3 row">
+        <label for="number" class="col-sm-2 col-form-label">Invoice No:</label>
+        <div class="col-sm-4">
+          <input type="number" class="form-control" id="number" required>
+          <div class="valid-feedback">Done 👍</div>
+        </div>
+      </div>
+
+      <div class="mb-3 row">
+        <label for="date" class="col-sm-2 col-form-label">Invoice Date:</label>
+        <div class="col-sm-4">
+          <input type="datetime-local" class="form-control" id="date" required>
+          <div class="valid-feedback">Done 👍</div>
+        </div>
+      </div>
+
+      <div class="mb-3 row">
+        <label for="name" class="col-sm-2 col-form-label">Name:</label>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="name" placeholder="Customer / Company Name" required>
+          <div class="valid-feedback">Done 👍</div>
+        </div>
+      </div>
+
+      <div class="mb-3 row">
+        <label for="address" class="col-sm-2 col-form-label">Address:</label>
+        <div class="col-sm-8">
+          <input type="text" class="form-control" id="address" placeholder="Address" required>
+          <div class="valid-feedback">Done 👍</div>
+        </div>
+      </div>
+
+      <div class="mb-3 row">
+        <label for="phone" class="col-sm-2 col-form-label">Phone Number:</label>
+        <div class="col-sm-4">
+          <input type="tel" class="form-control" id="phone" placeholder="0000000000" required>
+          <div class="valid-feedback">Done 👍</div>
+        </div>
+      </div>
+
+      <h5 class="mt-4">🛠️ Item Information:</h5>
+      <table class="table table-bordered mt-3">
+        <thead class="table-light">
+          <tr>
+            <th>SR No.</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="item-table-body">
+          <tr>
+            <td><input type="number" class="form-control" name="srno[]"></td>
+            <td><input type="text" class="form-control" name="info[]"></td>
+            <td><input type="number" class="form-control" name="qty[]"></td>
+            <td><input type="text" class="form-control" name="rate[]"></td>
+            <td><input type="text" class="form-control" name="amount[]" readonly></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="mb-4">
+        <button type="button" class="btn btn-success" onclick="addRow()">➕ Add New</button>
+      </div>
+
+      <div class="text-center mb-5">
+        <button type="button" class="btn btn-primary" onclick="save()">✅ Submit Bill</button>
+        <button type="reset" class="btn btn-danger">🧹 Clear Bill</button>
+        <button type="button" class="btn btn-success" onclick="show()">📖 Show Bill</button>
+        <button type="button" class="btn btn-warning" onclick="edit()">📝 Edit Bill</button>
+      </div>
+    </form>
+    <div class="container">
+      <h3>Stored Data:</h3>
+      <div id="test" class="alert alert-secondary"> </div>
+    </div>
+  </div>
+
+  <script>
+  
+    function updateAmount(row) {
+      const qty = row.querySelector("input[name='qty[]']").value;
+      const rate = row.querySelector("input[name='rate[]']").value;
+      const amountField = row.querySelector("input[name='amount[]']");
+      const total = parseFloat(qty || 0) * parseFloat(rate || 0);
+      amountField.value = isNaN(total) ? '' : total.toFixed(1);
+    }
+
+   
+    function addRow() {
+      const tableBody = document.getElementById("item-table-body");
+      const firstRow = tableBody.querySelector("tr");
+      const newRow = firstRow.cloneNode(true);
+
+      newRow.querySelectorAll("input").forEach(input => input.value = "");
+
+      const qtyInput = newRow.querySelector("input[name='qty[]']");
+      const rateInput = newRow.querySelector("input[name='rate[]']");
+      qtyInput.addEventListener("input", () => updateAmount(newRow));
+      rateInput.addEventListener("input", () => updateAmount(newRow));
+
+      tableBody.appendChild(newRow);
+    }
+
+    window.onload = function () {
+      const firstRow = document.querySelector("#item-table-body tr");
+      const qtyInput = firstRow.querySelector("input[name='qty[]']");
+      const rateInput = firstRow.querySelector("input[name='rate[]']");
+      qtyInput.addEventListener("input", () => updateAmount(firstRow));
+      rateInput.addEventListener("input", () => updateAmount(firstRow));
+    };
+
+    function save() {
+      var number = document.getElementById('number').value;
+      var date = document.getElementById('date').value;
+      var name = document.getElementById('name').value;
+      var address = document.getElementById('address').value;
+      var phone = document.getElementById('phone').value;
+
+      const rows = document.querySelectorAll("#item-table-body tr");
+      const items = [];
+
+      rows.forEach(row => {
+        const srno = row.querySelector("input[name='srno[]']").value;
+        const info = row.querySelector("input[name='info[]']").value;
+        const qty = row.querySelector("input[name='qty[]']").value;
+        const rate = row.querySelector("input[name='rate[]']").value;
+        const amount = row.querySelector("input[name='amount[]']").value;
+
+        if (srno || info || qty || rate || amount) {
+          items.push({ srno, info, qty, rate, amount });
+        }
+      });
+
+      const billData = { number, date, name, address, phone, items };
+      localStorage.setItem("bill_" + number, JSON.stringify(billData));
+
+      alert("Data Saved Successfully ✅");
+    }
+
+    function show() {
+      const allBills = Object.keys(localStorage)
+        .filter(key => key.startsWith('bill_')) 
+        .map(key => JSON.parse(localStorage.getItem(key))); 
+
+      let billSelectHTML = '<select class="form-select" id="billSelect" onchange="loadBill(this.value)">';
+      billSelectHTML += '<option value="">Select Bill</option>';
+
+      allBills.forEach(bill => {
+        billSelectHTML += `<option value="${bill.number}">Bill No. ${bill.number} - ${bill.date}</option>`;
+      });
+
+      billSelectHTML += '</select>';
+      document.getElementById("test").innerHTML = billSelectHTML;
+    }
+
+    function loadBill(billNumber) {
+      if (!billNumber) return;
+
+      const billData = JSON.parse(localStorage.getItem("bill_" + billNumber));
+      let rowsHTML = "";
+      let total = 0;
+
+      billData.items.forEach(item => {
+        rowsHTML += `
+            <tr>
+                <td>${item.srno}</td>
+                <td>${item.info}</td>
+                <td>${item.qty}</td>
+                <td>${item.rate}</td>
+                <td>${item.amount}</td>
+            </tr>
+        `;
+        total += parseFloat(item.amount || 0);
+      });
+
+      const billHTML = `
+        <div class="invoice-box">
+            <div class="invoice-header">
+                <center>
+                    <h2>SitaRam Engineering and Locomotive Company Ltd.</h2><br>
+                    Address : - Devipura Road, Tilak Nagar, Sikar (Raj.) Pin No.332001<br>
+                    Mobile No. +91-6376188144, Mobile No. +91-9928142877
+                </center>
+            </div>
+            <br>
+
+            <div class="row mb-3">
+                <div class="col-6"><strong>Invoice No. :</strong> <u>${billData.number}</u></div>
+                <div class="col-6 text-end"><strong>Invoice Date :</strong> <u>${billData.date}</u></div>
+            </div>
+
+            <div class="mb-2"><strong>Name :</strong> <u>${billData.name}</u></div>
+            <div class="mb-4"><strong>Address :</strong> <u>${billData.address}</u> 
+                <strong>Phone Number :</strong> <u>${billData.phone}</u>
+            </div>
+
+            <hr>
+
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sl.No.</th>
+                        <th>Description</th>
+                        <th>Qty.</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHTML}</tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>Total</strong></td>
+                        <td><strong>₹ ${total.toFixed(2)}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <p><strong>Rupees in words :</strong> ____________________________________________</p>
+
+            <div class="terms mt-3">
+                <strong>Terms & Conditions:</strong><br>
+                Write Your Terms & Conditions
+            </div>
+
+            <div class="signature">
+                <strong>Signature</strong>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <button class="btn btn-dark" onclick="printBill()">📄 Print This Bill</button>
+        </div>
+    `;
+
+      document.getElementById("test").innerHTML = billHTML;
+    }
+
+
+
+
+
+
+
+ 
+    function edit() {
+      document.getElementById("number").value = localStorage.getItem("number") || "";
+      document.getElementById("date").value = localStorage.getItem("date") || "";
+      document.getElementById("name").value = localStorage.getItem("name") || "";
+      document.getElementById("address").value = localStorage.getItem("address") || "";
+      document.getElementById("phone").value = localStorage.getItem("phone") || "";
+
+      const items = JSON.parse(localStorage.getItem("items")) || [];
+      const tableBody = document.getElementById("item-table-body");
+      tableBody.innerHTML = "";
+
+      items.forEach(item => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+                    <td><input type="number" class="form-control" name="srno[]" value="${item.srno}"></td>
+                    <td><input type="text" class="form-control" name="info[]" value="${item.info}"></td>
+                    <td><input type="number" class="form-control" name="qty[]" value="${item.qty}"></td>
+                    <td><input type="text" class="form-control" name="rate[]" value="${item.rate}"></td>
+                    <td><input type="text" class="form-control" name="amount[]" value="${item.amount}" readonly></td>
+                `;
+        tableBody.appendChild(row);
+      });
+    }
+  </script>
+
+  <script src="./car bill print.js"></script>
+
+</body>
+
+</html>
